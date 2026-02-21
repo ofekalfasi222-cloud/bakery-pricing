@@ -52,7 +52,7 @@ function App() {
     <div className="app">
       <header className="app-header">
         <div className="logo-container">
-          <img src="/logo.png" alt="ניצן - משהו מתוק" className="logo" />
+          <img src={import.meta.env.BASE_URL + 'logo.png'} alt="ניצן - משהו מתוק" className="logo" />
         </div>
         <h1>ניהול קונדיטוריה</h1>
         <button 
