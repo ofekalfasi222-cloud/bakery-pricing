@@ -26,7 +26,9 @@ function App() {
     data,
     isLoaded,
     isSaving,
+    isSyncing,
     lastSaved,
+    lastSynced,
     updateIngredients,
     updateRecipes,
     updatePackagings,
@@ -35,6 +37,7 @@ function App() {
     updateSettings,
     exportData,
     importData,
+    refreshFromCloud,
     getShareCode,
     connectWithCode,
   } = useCloudStorage();
@@ -169,8 +172,17 @@ function App() {
       <footer className="app-footer">
         <p>
           <span className="sync-status">
-            {isSaving ? '🔄 שומר...' : lastSaved ? `✅ ${lastSaved.toLocaleTimeString('he-IL')}` : '☁️'}
+            {isSaving ? '🔄 שומר...' : isSyncing ? '🔄 מסנכרן...' : lastSaved ? `✅ ${lastSaved.toLocaleTimeString('he-IL')}` : '☁️'}
           </span>
+          {' | '}
+          <button 
+            className="sync-btn" 
+            onClick={() => refreshFromCloud()} 
+            disabled={isSyncing}
+            title={lastSynced ? `סונכרן: ${lastSynced.toLocaleTimeString('he-IL')}` : 'רענן מהענן'}
+          >
+            🔄 סנכרן
+          </button>
           {' | '}
           <span className="stats">
             {(data.orders || []).length} הזמנות | {(data.products || []).length} מארזים

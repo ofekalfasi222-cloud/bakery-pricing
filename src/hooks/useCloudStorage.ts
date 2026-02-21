@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { AppData, PricingSettings } from '../types';
 
 const JSONBIN_API_KEY = '$2a$10$oZfLFV8vjYJgPdjv3gZK9O5OD2tUEsH30F7mZMQh4CDJqtrN3qIfq';
 const JSONBIN_BIN_ID_KEY = 'bakery-jsonbin-id';
+const SYNC_INTERVAL = 30000; // סנכרון כל 30 שניות
 
 const defaultSettings: PricingSettings = {
   laborCostPerHour: 50,
@@ -28,8 +29,11 @@ export function useCloudStorage() {
   const [data, setData] = useState<AppData>(defaultData);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [lastSynced, setLastSynced] = useState<Date | null>(null);
   const [binId, setBinId] = useState<string | null>(null);
+  const lastLocalUpdate = useRef<number>(0);
 
   // יצירת bin חדש או טעינה מקיים
   useEffect(() => {
@@ -121,6 +125,7 @@ export function useCloudStorage() {
 
   // עדכון נתונים
   const updateData = useCallback((newData: AppData) => {
+    lastLocalUpdate.current = Date.now();
     setData(newData);
     saveToCloud(newData);
   }, [saveToCloud]);
@@ -157,9 +162,10 @@ export function useCloudStorage() {
   };
 
   // רענון מהענן
-  const refreshFromCloud = async () => {
+  const refreshFromCloud = useCallback(async (silent = false) => {
     if (!binId) return;
     
+    if (!silent) setIsSyncing(true);
     try {
       const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
         headers: {
@@ -169,16 +175,46 @@ export function useCloudStorage() {
       
       if (response.ok) {
         const result = await response.json();
-        setData({
+        const newData = {
           ...defaultData,
           ...result.record,
           settings: { ...defaultSettings, ...result.record?.settings },
-        });
+        };
+        setData(newData);
+        setLastSynced(new Date());
       }
     } catch (error) {
       console.error('Error refreshing data:', error);
     }
-  };
+    if (!silent) setIsSyncing(false);
+  }, [binId]);
+
+  // סנכרון אוטומטי כל 30 שניות
+  useEffect(() => {
+    if (!binId || !isLoaded) return;
+
+    const syncInterval = setInterval(() => {
+      // רק אם לא היה עדכון מקומי ב-5 שניות האחרונות
+      const timeSinceLastUpdate = Date.now() - lastLocalUpdate.current;
+      if (timeSinceLastUpdate > 5000) {
+        refreshFromCloud(true);
+      }
+    }, SYNC_INTERVAL);
+
+    return () => clearInterval(syncInterval);
+  }, [binId, isLoaded, refreshFromCloud]);
+
+  // סנכרון כשחוזרים לטאב (focus)
+  useEffect(() => {
+    const handleFocus = () => {
+      if (binId && isLoaded) {
+        refreshFromCloud(true);
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [binId, isLoaded, refreshFromCloud]);
 
   // ייצוא וייבוא
   const exportData = () => {
@@ -256,7 +292,9 @@ export function useCloudStorage() {
     data,
     isLoaded,
     isSaving,
+    isSyncing,
     lastSaved,
+    lastSynced,
     updateIngredients,
     updateRecipes,
     updatePackagings,

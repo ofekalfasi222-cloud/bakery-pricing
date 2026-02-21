@@ -231,6 +231,27 @@
   font-weight: 500;
 }
 
+.sync-btn {
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s;
+}
+
+.sync-btn:hover:not(:disabled) {
+  background: var(--primary);
+  color: white;
+}
+
+.sync-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* סקשנים */
 .section {
   margin-bottom: 2rem;
