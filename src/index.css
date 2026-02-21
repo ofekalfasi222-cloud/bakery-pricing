@@ -1,0 +1,97 @@
+/* איפוס וגופנים */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  direction: rtl;
+  text-align: right;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* תמיכה בעברית */
+input,
+select,
+textarea,
+button {
+  font-family: inherit;
+  direction: rtl;
+}
+
+/* סטיילינג לאינפוטים ב-dark mode */
+input,
+select,
+textarea {
+  background: var(--bg-card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-light);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.2);
+}
+
+/* גלילה חלקה */
+html {
+  scroll-behavior: smooth;
+}
+
+/* בחירת טקסט */
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* סרגל גלילה מעוצב */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--primary-light);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--secondary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-light);
+}
+
+/* נגישות */
+:focus-visible {
+  outline: 2px solid #e91e63;
+  outline-offset: 2px;
+}
+
+/* אנימציות */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
