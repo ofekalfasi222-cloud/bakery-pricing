@@ -33,6 +33,7 @@ export function useCloudStorage() {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [lastSynced, setLastSynced] = useState<Date | null>(null);
   const [binId, setBinId] = useState<string | null>(null);
+  const [syncError, setSyncError] = useState<string | null>(null);
   const lastLocalUpdate = useRef<number>(0);
 
   // יצירת bin חדש או טעינה מקיים
@@ -101,9 +102,14 @@ export function useCloudStorage() {
 
   // שמירה לענן
   const saveToCloud = useCallback(async (newData: AppData) => {
-    if (!binId) return;
+    if (!binId) {
+      console.warn('No binId available, cannot save to cloud');
+      setSyncError('לא מחובר לענן - השינויים לא נשמרו');
+      return;
+    }
     
     setIsSaving(true);
+    setSyncError(null);
     try {
       const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
         method: 'PUT',
@@ -116,9 +122,14 @@ export function useCloudStorage() {
       
       if (response.ok) {
         setLastSaved(new Date());
+        setSyncError(null);
+      } else {
+        console.error('Save failed:', response.status, response.statusText);
+        setSyncError('שגיאה בשמירה לענן');
       }
     } catch (error) {
       console.error('Error saving data:', error);
+      setSyncError('שגיאת רשת - השינויים לא נשמרו');
     }
     setIsSaving(false);
   }, [binId]);
@@ -295,6 +306,8 @@ export function useCloudStorage() {
     isSyncing,
     lastSaved,
     lastSynced,
+    syncError,
+    binId,
     updateIngredients,
     updateRecipes,
     updatePackagings,

@@ -29,6 +29,8 @@ function App() {
     isSyncing,
     lastSaved,
     lastSynced,
+    syncError,
+    binId,
     updateIngredients,
     updateRecipes,
     updatePackagings,
@@ -170,6 +172,9 @@ function App() {
       </main>
 
       <footer className="app-footer">
+        {syncError && (
+          <p className="sync-error">⚠️ {syncError}</p>
+        )}
         <p>
           <span className="sync-status">
             {isSaving ? '🔄 שומר...' : isSyncing ? '🔄 מסנכרן...' : lastSaved ? `✅ ${lastSaved.toLocaleTimeString('he-IL')}` : '☁️'}
@@ -187,6 +192,9 @@ function App() {
           <span className="stats">
             {(data.orders || []).length} הזמנות | {(data.products || []).length} מארזים
           </span>
+          {binId && (
+            <span className="bin-id" title="קוד סנכרון"> | 🔗 {binId.slice(-6)}</span>
+          )}
         </p>
       </footer>
     </div>
